@@ -9,7 +9,7 @@ class CustomPagination(PageNumberPagination):
     def get_paginated_response(self, data):
         return Response({
             'success': True,
-            'message': 'Usuarios obtenidos exitosamente',
+            'message': 'Datos obtenidos exitosamente',
             'data': data,
             'total_items': self.page.paginator.count,
             'total_pages': self.page.paginator.num_pages,

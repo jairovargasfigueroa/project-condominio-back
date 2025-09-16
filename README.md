@@ -27,7 +27,7 @@ project-demo-django/
 │       ├── services.py         # Lógica de negocio
 │       ├── serializers.py      # Validaciones
 │       └── ...
-├── project_demo/               # Configuración Django
+├── project_condominio/         # Configuración Django
 │   ├── settings.py
 │   ├── urls.py
 │   └── ...

@@ -1,13 +1,13 @@
-# usuarios/serializers.py
+# accounts/serializers.py
 from rest_framework import serializers
 from .models import CustomUser
 
 class UserSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, min_length=8)
-    
+
     class Meta:
         model = CustomUser
-        fields = ['id', 'username', 'email', 'first_name', 'last_name', 
+        fields = ['id', 'username', 'email', 'first_name', 'last_name',
                  'telefono', 'fecha_nacimiento', 'password', 'date_joined']
         extra_kwargs = {
             'password': {'write_only': True},
