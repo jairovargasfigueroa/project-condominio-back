@@ -1,10 +1,11 @@
+from django.conf import settings
 from django.db import models
 
 # Create your models here.
 
 class Vehiculo(models.Model):
-    residente = models.ForeignKey(
-        'residentes.Residente',
+    usuario = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name='vehiculos'
     )
