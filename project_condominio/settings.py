@@ -47,6 +47,14 @@ INSTALLED_APPS = [
     'apps.residentes',
     'apps.mascotas',
     'apps.vehiculos',
+    'apps.viviendas',
+    'apps.expensas',
+    'apps.reservas',
+    'apps.areas_comunes',
+    'apps.accesos',
+    'apps.historial_viviendas',
+    'apps.comunicados',
+    'apps.lectura_comunicados'
 ]
 
 
