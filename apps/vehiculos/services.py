@@ -45,6 +45,18 @@ class VehiculoService:
     @staticmethod
     @transaction.atomic
     def update_vehiculo(vehiculo, validated_data):
+        # Extraer usuario_id si viene (igual que en create)
+        usuario_id = validated_data.pop('usuario_id', None)
+
+        if usuario_id:
+            try:
+                from django.contrib.auth import get_user_model
+                user = get_user_model().objects.get(id=usuario_id, is_active=True)
+                vehiculo.usuario = user  # Reasignar usuario existente
+            except get_user_model().DoesNotExist:
+                raise ValidationError("El usuario especificado no existe o no está activo")
+
+        # Actualizar otros campos del vehículo
         for field, value in validated_data.items():
             setattr(vehiculo, field, value)
         vehiculo.save()

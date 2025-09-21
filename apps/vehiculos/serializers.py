@@ -1,10 +1,11 @@
 from rest_framework import serializers
 from django.conf import settings
 from .models import Vehiculo
+from apps.accounts.serializers import UserSerializer
 
 
 class VehiculoSerializer(serializers.ModelSerializer):
-    usuario = serializers.StringRelatedField(read_only=True)
+    usuario = UserSerializer(read_only=True)
     usuario_id = serializers.IntegerField(write_only=True, required=False)
 
     class Meta:
