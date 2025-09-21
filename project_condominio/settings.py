@@ -56,7 +56,9 @@ INSTALLED_APPS = [
     'apps.comunicados',
     'apps.lectura_comunicados',
     'apps.categorias',
-    'apps.copropietarios'
+    'apps.copropietarios',
+    'apps.guardias'
+
 ]
 
 

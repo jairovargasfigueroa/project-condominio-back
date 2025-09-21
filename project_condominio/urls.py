@@ -29,4 +29,5 @@ urlpatterns = [
     path('', include('apps.viviendas.urls')),
     path('', include('apps.administradores.urls')),
     path('', include('apps.copropietarios.urls')),
+    path('', include('apps.guardias.urls')),
 ]

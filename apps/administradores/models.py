@@ -14,6 +14,3 @@ class Administrador(models.Model):
     def __str__(self):
         return f"Administrador: {self.usuario.get_full_name()}"
 
-    class Meta:
-        verbose_name = "Administrador"
-        verbose_name_plural = "Administradores"
