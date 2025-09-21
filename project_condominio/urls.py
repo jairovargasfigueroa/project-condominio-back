@@ -25,4 +25,5 @@ urlpatterns = [
     path('', include('apps.vehiculos.urls')),
     path('', include('apps.areas_comunes.urls')),
     path('', include('apps.reservas.urls')),
+    path('', include('apps.categorias.urls')),
 ]
