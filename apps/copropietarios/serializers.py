@@ -16,3 +16,5 @@ class CopropietarioSerializer(serializers.ModelSerializer):
         """Validación a nivel de objeto"""
         # Validaciones cruzadas entre campos si es necesario
         return attrs
+        # Validaciones cruzadas entre campos si es necesario
+        return attrs

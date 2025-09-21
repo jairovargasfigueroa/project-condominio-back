@@ -71,9 +71,49 @@ class CopropietarioService:
     """
     Eliminar copropietario (soft delete del usuario)
     """
+    # Antes de eliminar, quitar la relación con viviendas
+    copropietario.viviendas.update(copropietario=None)
+
     # Soft delete del usuario asociado
     copropietario.usuario.is_active = False
     copropietario.usuario.save()
 
     # También podrías eliminar físicamente el registro del copropietario
     # copropietario.delete()
+
+  @staticmethod
+  def get_viviendas_by_copropietario(copropietario_id):
+    """Obtener todas las viviendas de un copropietario específico"""
+    copropietario = CopropietarioService.get_copropietario_by_id(copropietario_id)
+    if not copropietario:
+        return []
+    return copropietario.viviendas.select_related('categoria').all().order_by('numero')
+
+  @staticmethod
+  def get_estadisticas_copropietarios():
+    """Obtener estadísticas de copropietarios y sus propiedades"""
+    from apps.viviendas.models import Vivienda
+
+    total_copropietarios = CopropietarioService.get_active_copropietarios().count()
+    copropietarios_con_viviendas = Copropietario.objects.filter(
+        viviendas__isnull=False
+    ).distinct().count()
+    copropietarios_sin_viviendas = total_copropietarios - copropietarios_con_viviendas
+
+    # Estadísticas de distribución de propiedades
+    distribucion_propiedades = {}
+    copropietarios = CopropietarioService.get_active_copropietarios()
+
+    for copropietario in copropietarios:
+        cantidad_viviendas = copropietario.viviendas.count()
+        if cantidad_viviendas in distribucion_propiedades:
+            distribucion_propiedades[cantidad_viviendas] += 1
+        else:
+            distribucion_propiedades[cantidad_viviendas] = 1
+
+    return {
+        'total_copropietarios': total_copropietarios,
+        'copropietarios_con_viviendas': copropietarios_con_viviendas,
+        'copropietarios_sin_viviendas': copropietarios_sin_viviendas,
+        'distribucion_propiedades': distribucion_propiedades,
+    }
