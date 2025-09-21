@@ -79,9 +79,10 @@ class ViviendaService:
                 raise ValidationError("La categoría especificada no existe")
             vivienda.categoria = categoria
 
-        # Manejar copropietario (puede ser None para quitar propietario)
-        if 'copropietario_id' in validated_data or copropietario_id is not None:
+        # Manejar copropietario - verificar si copropietario_id estaba en el request original
+        if copropietario_id is not None:  # None o un valor específico
             if copropietario_id:
+                # Asignar nuevo copropietario
                 copropietario = CopropietarioService.get_copropietario_by_id(copropietario_id)
                 if not copropietario:
                     raise ValidationError("El copropietario especificado no existe")
