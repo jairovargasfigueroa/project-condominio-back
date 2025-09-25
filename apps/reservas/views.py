@@ -2,6 +2,7 @@ from django.shortcuts import render
 from rest_framework import status, viewsets
 from rest_framework.response import Response
 from rest_framework.decorators import action
+from rest_framework.permissions import IsAuthenticated
 from django.core.exceptions import ValidationError
 
 from apps.core.pagination import CustomPagination
@@ -43,7 +44,25 @@ class ReservaViewSet(viewsets.ViewSet):
 
     def create(self, request):
         try:
-            serializer = ReservaSerializer(data=request.data)
+            data = request.data.copy()
+
+            # 🔍 LÓGICA INTELIGENTE: Si no viene residente_id, usar el usuario autenticado
+            if 'residente_id' not in data or data.get('residente_id') is None:
+                # Caso MÓVIL: Obtener residente del usuario autenticado
+                from apps.residentes.services import ResidenteService
+
+                residente = ResidenteService.get_residente_by_user(request.user)
+                if not residente:
+                    return Response({
+                        'success': False,
+                        'message': 'Usuario no tiene un perfil de residente asociado'
+                    }, status=status.HTTP_400_BAD_REQUEST)
+
+                data['residente_id'] = residente.id
+
+            # Si viene residente_id, es el caso WEB (admin eligiendo residente)
+
+            serializer = ReservaSerializer(data=data)
             if not serializer.is_valid():
                 return Response({
                     'success': False,
@@ -233,4 +252,29 @@ class ReservaViewSet(viewsets.ViewSet):
             return Response({
                 'success': False,
                 'message': f'Error al obtener estadísticas: {str(e)}'
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    @action(detail=False, methods=['get'], url_path='mis-reservas')
+    def reservas_usuario(self, request):
+        """GET /api/reservas/mis-reservas/ - Obtener MIS reservas del usuario autenticado"""
+        try:
+            user = request.user
+
+            # ✅ USAR SERVICE para obtener reservas del usuario autenticado
+            reservas = ReservaService.get_reservas_by_user(user)
+
+            # Aplicar paginación
+            paginator = CustomPagination()
+            paginated_queryset = paginator.paginate_queryset(reservas, request)
+
+            # ✅ USAR SERIALIZER para formatear respuesta
+            serializer = ReservaSerializer(paginated_queryset, many=True)
+
+            # Devolver respuesta paginada
+            return paginator.get_paginated_response(serializer.data)
+
+        except Exception as e:
+            return Response({
+                'success': False,
+                'message': f'Error al obtener mis reservas: {str(e)}'
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

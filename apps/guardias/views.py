@@ -2,6 +2,7 @@ from django.shortcuts import render
 from rest_framework import status, viewsets
 from rest_framework.response import Response
 from rest_framework.decorators import action
+from rest_framework.permissions import IsAuthenticated
 from django.core.exceptions import ValidationError
 
 from apps.core.pagination import CustomPagination
@@ -11,6 +12,7 @@ from apps.guardias.services import GuardiaService
 # Create your views here.
 
 class GuardiaViewSet(viewsets.ViewSet):
+    permission_classes = [IsAuthenticated]
 
     def list(self, request):
         """GET /api/guardias/ - Listar guardias activos"""
@@ -184,4 +186,35 @@ class GuardiaViewSet(viewsets.ViewSet):
             return Response({
                 'success': False,
                 'message': f'Error en búsqueda: {str(e)}'
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    @action(detail=False, methods=['get'])
+    def perfil(self, request):
+        """GET /api/guardias/perfil/ - Obtener MI perfil de guardia autenticado"""
+        try:
+            user = request.user
+
+            # ✅ USAR SERVICE para obtener datos (siguiendo tu patrón)
+            guardia = GuardiaService.get_guardia_by_user(user)
+
+            if not guardia:
+                return Response({
+                    'success': False,
+                    'message': 'Usuario no tiene perfil de guardia asociado'
+                }, status=status.HTTP_404_NOT_FOUND)
+
+            # ✅ USAR SERIALIZER para formatear respuesta (siguiendo tu patrón)
+            # Tu serializer ya tiene usuario = UserSerializer() anidado
+            serializer = GuardiaSerializer(guardia)
+
+            return Response({
+                'success': True,
+                'data': serializer.data,
+                'message': 'Perfil obtenido exitosamente'
+            }, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            return Response({
+                'success': False,
+                'message': f'Error al obtener perfil: {str(e)}'
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

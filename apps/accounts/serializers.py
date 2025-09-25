@@ -8,11 +8,12 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
         fields = ['id', 'username', 'email', 'first_name', 'last_name',
-                 'telefono', 'fecha_nacimiento', 'password', 'date_joined']
+                 'telefono', 'fecha_nacimiento', 'password', 'date_joined', 'rol']
         extra_kwargs = {
             'password': {'write_only': True},
             'id': {'read_only': True},
             'date_joined': {'read_only': True},
+            'rol': {'read_only': True},  # El rol no se puede editar desde el serializer
         }
 
     def validate_telefono(self, value):

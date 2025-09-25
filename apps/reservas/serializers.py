@@ -56,8 +56,8 @@ class ReservaSerializer(serializers.ModelSerializer):
         metodo_pago = attrs.get('metodo_pago')
 
         if not self.instance:
-            if not residente_id:
-                raise serializers.ValidationError("Debe proporcionar residente_id")
+            # ✅ residente_id ya no es obligatorio aquí (se maneja en la vista)
+            # Solo validamos que venga area_comun_id
             if not area_comun_id:
                 raise serializers.ValidationError("Debe proporcionar area_comun_id")
 

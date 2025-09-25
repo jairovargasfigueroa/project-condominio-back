@@ -69,6 +69,22 @@ class ReservaService:
         ).select_related('area_comun').order_by('-fecha_reserva')
 
     @staticmethod
+    def get_reservas_by_user(user):
+        """Obtener reservas del usuario autenticado"""
+        try:
+            # Primero obtenemos el residente asociado al usuario
+            residente = ResidenteService.get_residente_by_user(user)
+            if not residente:
+                return Reserva.objects.none()  # QuerySet vacío
+
+            # Obtenemos las reservas de ese residente
+            return Reserva.objects.filter(
+                residente=residente
+            ).select_related('area_comun').order_by('-fecha_reserva', '-hora_inicio')
+        except Exception:
+            return Reserva.objects.none()
+
+    @staticmethod
     def get_reservas_by_area(area_id):
         return Reserva.objects.filter(
             area_comun_id=area_id

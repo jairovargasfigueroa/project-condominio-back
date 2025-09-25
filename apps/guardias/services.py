@@ -48,6 +48,14 @@ class GuardiaService:
             return None
 
     @staticmethod
+    def get_guardia_by_user(user):
+        """Obtener guardia por usuario autenticado"""
+        try:
+            return Guardia.objects.select_related('usuario').get(usuario=user)
+        except Guardia.DoesNotExist:
+            return None
+
+    @staticmethod
     @transaction.atomic
     def update_guardia(guardia, validated_data):
         """
