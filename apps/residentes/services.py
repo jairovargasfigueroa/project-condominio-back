@@ -53,6 +53,14 @@ class ResidenteService:
         return None
 
   @staticmethod
+  def get_residente_by_user(user):
+    """Obtener residente por usuario autenticado"""
+    try:
+        return Residente.objects.select_related('usuario').get(usuario=user)
+    except Residente.DoesNotExist:
+        return None
+
+  @staticmethod
   @transaction.atomic
   def update_residente(residente, validated_data):
     """

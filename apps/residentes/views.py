@@ -2,6 +2,7 @@ from django.shortcuts import render
 from rest_framework import status, viewsets
 from rest_framework.response import Response
 from rest_framework.decorators import action
+from rest_framework.permissions import IsAuthenticated
 from django.core.exceptions import ValidationError
 
 from apps.core.pagination import CustomPagination
@@ -12,8 +13,7 @@ from apps.residentes.services import ResidenteService
 
 class ResidenteViewSet(viewsets.ViewSet):
 
-
-  def list(self, request):
+    def list(self, request):
         """GET /api/residentes/ - Listar residentes activos"""
         try:
 
@@ -36,7 +36,7 @@ class ResidenteViewSet(viewsets.ViewSet):
                 'message': f'Error al obtener residentes: {str(e)}'
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-  def create(self, request):
+    def create(self, request):
         """POST /api/residentes/ - Crear nuevo residente"""
         try:
             # 1. Validar FORMATO con serializer
@@ -72,7 +72,7 @@ class ResidenteViewSet(viewsets.ViewSet):
                 'message': f'Error interno: {str(e)}'
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-  def retrieve(self, request, pk=None):
+    def retrieve(self, request, pk=None):
         """GET /api/residentes/{pk}/ - Obtener residente específico"""
         try:
             residente = ResidenteService.get_residente_by_id(pk)
@@ -95,7 +95,7 @@ class ResidenteViewSet(viewsets.ViewSet):
                 'message': f'Error al obtener residente: {str(e)}'
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-  def update(self, request, pk=None):
+    def update(self, request, pk=None):
         """PUT /api/residentes/{pk}/ - Actualizar residente completo"""
         try:
             # 1. Obtener residente
@@ -137,7 +137,7 @@ class ResidenteViewSet(viewsets.ViewSet):
                 'message': f'Error al actualizar residente: {str(e)}'
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-  def partial_update(self, request, pk=None):
+    def partial_update(self, request, pk=None):
         """PATCH /api/residentes/{pk}/ - Actualizar campos específicos"""
         try:
             # 1. Obtener residente
@@ -179,7 +179,7 @@ class ResidenteViewSet(viewsets.ViewSet):
                 'message': f'Error al actualizar residente: {str(e)}'
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-  def destroy(self, request, pk=None):
+    def destroy(self, request, pk=None):
         """DELETE /api/residentes/{pk}/ - Eliminar residente (soft delete)"""
         try:
             residente = ResidenteService.get_residente_by_id(pk)
@@ -203,8 +203,8 @@ class ResidenteViewSet(viewsets.ViewSet):
                 'message': f'Error al eliminar residente: {str(e)}'
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-  @action(detail=False, methods=['get'])
-  def estadisticas(self, request):
+    @action(detail=False, methods=['get'])
+    def estadisticas(self, request):
         """GET /api/residentes/estadisticas/ - Obtener estadísticas de residentes"""
         try:
             stats = ResidenteService.get_estadisticas()
@@ -220,8 +220,40 @@ class ResidenteViewSet(viewsets.ViewSet):
                 'message': f'Error al obtener estadísticas: {str(e)}'
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-  @action(detail=True, methods=['post'])
-  def cambiar_zona(self, request, pk=None):
+
+    @action(detail=False, methods=['get'])
+    def perfil(self, request):
+        """GET /api/residentes/mi-perfil/ - Obtener MI perfil de residente autenticado"""
+        try:
+            user = request.user
+
+            # ✅ USAR SERVICE para obtener datos (siguiendo tu patrón)
+            residente = ResidenteService.get_residente_by_user(user)
+
+            if not residente:
+                return Response({
+                    'success': False,
+                    'message': 'Usuario no tiene perfil de residente asociado'
+                }, status=status.HTTP_404_NOT_FOUND)
+
+            # ✅ USAR SERIALIZER para formatear respuesta (siguiendo tu patrón)
+            # Tu serializer ya tiene usuario = UserSerializer() anidado
+            serializer = ResidenteSerializer(residente)
+
+            return Response({
+                'success': True,
+                'data': serializer.data,
+                'message': 'Perfil obtenido exitosamente'
+            }, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            return Response({
+                'success': False,
+                'message': f'Error al obtener perfil: {str(e)}'
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    @action(detail=True, methods=['post'])
+    def cambiar_zona(self, request, pk=None):
         """POST /api/residentes/{pk}/cambiar_zona/ - Cambiar zona del residente"""
         try:
             residente = ResidenteService.get_residente_by_id(pk)
